@@ -29,9 +29,10 @@
 -- Addon description
 _addon.name = 'XIV Crossbar' -- based on Edeon's XIV Hotbar
 _addon.author = 'Aliekber'
-_addon.version = '0.1'
+_addon.version = '0.2'
 _addon.language = 'english'
 _addon.commands = {'xivcrossbar', 'xb'}
+_addon.contributors = {'Frostbite'}
 
 -- Libs
 res = require 'resources'
@@ -88,6 +89,11 @@ local right_trigger_lifted_during_doublepress_window = false
 local is_left_doublepress_window_open = false
 local is_right_doublepress_window_open = false
 
+if _addon.contributors then
+    windower.console.write(_addon.name .. " v" .. _addon.version .. " loaded. Author: " .. _addon.author .. ", Contributors: " .. table.concat(_addon.contributors, ", "))
+end
+
+
 local function close_left_doublepress_window()
     is_left_doublepress_window_open = false
     left_trigger_lifted_during_doublepress_window = false
@@ -101,7 +107,14 @@ end
 -- command to set a crossbar action in action_binder
 function set_hotkey(hotbar, slot, action_type, action, target, command, icon)
     local environment = player.hotbar_settings.active_environment
-
+	
+	--debug.debug
+	--windower.add_to_chat(207, string.format(
+	--	"Hotbar: %s | Slot: %s | Action Type: %s | Action: %s | Target: %s | Command: %s | Icon: %s",
+	--	tostring(hotbar), tostring(slot), tostring(action_type), tostring(action),
+	--	tostring(target), tostring(command), tostring(icon)
+	--))	
+	
     local alias = nil
     if (action == 'Ranged Attack') then
         action = 'ra'

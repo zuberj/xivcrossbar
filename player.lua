@@ -411,7 +411,7 @@ function player:execute_action(slot)
         if (action.warmup ~= nil) then
             delay = delay + action.warmup
         end
-        local recast = action.cooldown
+        local recast = action.cooldown --look at for custom cooldown?
 
         if (equip_slot ~= nil) then
             windower.send_command('gs disable ' .. equip_slot)
@@ -436,9 +436,26 @@ function player:execute_action(slot)
         target_string = '" <' .. action.target .. '>'
     end
 
+	--
+	local player = windower.ffxi.get_player()
+	local mount_name = action.action or "Unknown"
+	
+	--windower.add_to_chat(207, action.type)
+	--windower.add_to_chat(207, player.status)
+	--windower.add_to_chat(207, action.action)
+
+	--2025-03-22 updated per Frostbite.  Will now correctly mount/dismount individual mounts.
     if action.type == 'mount' and action.action == 'Mount Roulette' then
         mount_roulette:ride_random_mount()
         return
+	elseif(action.type == 'mount' and (player.status ~= 5 and player.status ~= 85)) then --If mount command and not the roulette, and also not currently mounted - selected mount
+			windower.add_to_chat(207, "Attempting to mount: " .. mount_name)		
+			windower.send_command('input /mount \"' .. action.action .. '\"')
+		return
+	elseif(action.type == 'mount' and (player.status == 5 or player.status ==85)) then --if mount command and currently mounted
+			windower.add_to_chat(207, "You are already mounted. Dismounting: " .. mount_name )
+			windower.send_command('input /dismount')
+		return
     elseif (action.type == 'ta' and action.action == 'Switch Target' and action.alias == 'Switch Target') then
         if (self.in_battle) then
             windower.send_command('input /a ' .. target_string)

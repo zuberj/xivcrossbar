@@ -71,7 +71,7 @@ local action_types = {
     ['PHANTOM_ROLL'] = 13,
     ['QUICK_DRAW'] = 14,
     ['STRATAGEMS'] = 15,
-    ['DANCES'] = 16,
+    ['SAMBAS'] = 16,
     ['RUNE_ENCHANTMENT'] = 17,
     ['WARD'] = 18,
     ['EFFUSION'] = 19,
@@ -88,7 +88,11 @@ local action_types = {
     ['SWITCH_TARGET'] = 30,
     ['SWITCH_CROSSBARS'] = 31,
     ['MOVE_CROSSBARS'] = 32,
-    ['SHOW_CREDITS'] = 33
+    ['SHOW_CREDITS'] = 33,
+	['WALTZES'] = 34,
+	['JIGS'] = 35,
+	['STEPS'] = 36,
+	['FLOURISHES'] = 37	
 }
 
 local prefix_lookup = {
@@ -108,7 +112,11 @@ local prefix_lookup = {
     [action_types.PHANTOM_ROLL] = 'ja',
     [action_types.QUICK_DRAW] = 'ja',
     [action_types.STRATAGEMS] = 'ja',
-    [action_types.DANCES] = 'ja',
+    [action_types.SAMBAS] = 'ja',
+	[action_types.WALTZES] = 'ja',
+	[action_types.JIGS] = 'ja',
+	[action_types.STEPS] = 'ja',
+	[action_types.FLOURISHES] = 'ja',	
     [action_types.RUNE_ENCHANTMENT] = 'ja',
     [action_types.WARD] = 'ja',
     [action_types.EFFUSION] = 'ja',
@@ -547,6 +555,9 @@ function action_binder:submit_selected_option()
     if (self.state == states.SELECT_ACTION_TYPE) then
         self.selection_states[states.SELECT_ACTION_TYPE] = self.selector:export_selection_state()
         self.action_type = self.selector:submit_selected_option().id
+		
+		--windower.add_to_chat(207, "action name self: " .. (self.action_name or "?"))
+		--windower.add_to_chat(207, "action type state: " .. (states.SELECT_ACTION_TYPE or "?"))
 
         if (self.action_type == action_types.SHOW_CREDITS) then
             self.state = states.SHOW_CREDITS
@@ -769,6 +780,7 @@ function action_binder:display_action_type_selector()
     action_type_list:append({id = action_types.DELETE, name = 'Remove a Binding', icon = 'images/' ..get_icon_pathbase() .. '/ui/red-x.png'})
     action_type_list:append({id = action_types.JOB_ABILITY, name = 'Job Ability', icon = 'images/icons/abilities/00001.png', icon_offset = 4})
     action_type_list:append({id = action_types.WEAPONSKILL, name = 'Weaponskill', icon = 'images/icons/weapons/sword.png', icon_offset = 4})
+	
     if (pet_jobs[main_job] or pet_jobs[sub_job]) then
         action_type_list:append({id = action_types.PET_COMMAND, name = 'Pet Command', icon = 'images/' ..get_icon_pathbase() .. '/mounts/crab.png'})
     end
@@ -802,8 +814,13 @@ function action_binder:display_action_type_selector()
     if (main_job == 'SCH' or sub_job == 'SCH') then
         action_type_list:append({id = action_types.STRATAGEMS, name = 'Stratagem', icon = 'images/' ..get_icon_pathbase() .. '/jobs/SCH.png'})
     end
+	--set dance icons here
     if (main_job == 'DNC' or sub_job == 'DNC') then
-        action_type_list:append({id = action_types.DANCES, name = 'Dance', icon = 'images/' ..get_icon_pathbase() .. '/jobs/DNC.png'})
+        action_type_list:append({id = action_types.SAMBAS, name = 'Samba', icon = 'images/' ..get_icon_pathbase() .. '/jobs/DNC.png'})
+		action_type_list:append({id = action_types.WALTZES, name = 'Waltzes', icon = 'images/' ..get_icon_pathbase() .. '/jobs/DNC.png'})
+		action_type_list:append({id = action_types.JIGS, name = 'Jigs', icon = 'images/' ..get_icon_pathbase() .. '/jobs/DNC.png'})
+		action_type_list:append({id = action_types.STEPS, name = 'Steps', icon = 'images/' ..get_icon_pathbase() .. '/jobs/DNC.png'})
+		action_type_list:append({id = action_types.FLOURISHES, name = 'Flourishes I/II/III', icon = 'images/' ..get_icon_pathbase() .. '/jobs/DNC.png'})		
     end
     if (main_job == 'RUN' or sub_job == 'RUN') then
         action_type_list:append({id = action_types.RUNE_ENCHANTMENT, name = 'Rune Enchantment', icon = 'images/' ..get_icon_pathbase() .. '/jobs/RUN.png'})
@@ -826,6 +843,7 @@ function action_binder:display_action_type_selector()
     action_type_list:append({id = action_types.SWITCH_CROSSBARS, name = 'Switch Crossbars', icon = 'images/' ..get_icon_pathbase() .. '/ui/facebuttons_' .. self.button_layout .. '.png'})
     action_type_list:append({id = action_types.MOVE_CROSSBARS, name = 'Move Crossbar', icon = 'images/' ..get_icon_pathbase() .. '/ui/dpad_' .. self.button_layout .. '.png'})
     action_type_list:append({id = action_types.SHOW_CREDITS, name = 'XIVCrossbar Credits', icon = 'images/credit_avatars/xiv.png'})
+	
     self.selector:display_options(action_type_list)
 
     self:show_control_hints('Confirm', 'Exit')
@@ -862,14 +880,22 @@ function action_binder:display_action_selector()
         self:display_quick_draw_selector()
     elseif (self.action_type == action_types.STRATAGEMS) then
         self:display_stratagem_selector()
-    elseif (self.action_type == action_types.DANCES) then
-        self:display_dance_selector()
+    elseif (self.action_type == action_types.SAMBAS) then  --add other dance types here
+        self:display_dance_selector("SAMBA")
+	elseif (self.action_type == action_types.WALTZES) then
+        self:display_dance_selector("WALTZ")
+	elseif (self.action_type == action_types.JIGS) then
+		self:display_dance_selector("JIG")
+	elseif (self.action_type == action_types.STEPS) then
+		self:display_dance_selector("STEP")
+	elseif (self.action_type == action_types.FLOURISHES) then
+		self:display_dance_selector("FLOURISH")	
     elseif (self.action_type == action_types.RUNE_ENCHANTMENT) then
         self:display_rune_enchantment_selector()
     elseif (self.action_type == action_types.WARD) then
-        self:display_ward_selector()
+        self:display_rune_ward_selector()
     elseif (self.action_type == action_types.EFFUSION) then
-        self:display_effusion_selector()
+        self:display_rune_effusion_selector()
     elseif (self.action_type == action_types.GEOMANCY) then
         self:display_geomancy_selector()
     elseif (self.action_type == action_types.TRUST) then
@@ -983,6 +1009,7 @@ function action_binder:display_button_confirmer()
 end
 
 function action_binder:assign_action()
+	--windower.add_to_chat("Entered the assign_action")
     self.save_binding(self.active_crossbar, self.hotkey, prefix_lookup[self.action_type], self.action_name, self.action_target, self.action_command, self.action_icon)
     self:hide()
     self:reset_state()
@@ -1290,6 +1317,7 @@ function action_binder:show_control_hints(confirm, go_back)
     end
 end
 
+--this function will set what abilities are shown when you select an action-type
 function action_binder:display_ability_selector()
     self.title:text('Select Job Ability')
     self.title:show()
@@ -1304,29 +1332,53 @@ function action_binder:display_ability_selector()
     local skip_categories = {
         ['phantom-rolls'] = true,
         ['quick-draw'] = true,
-        ['stratagems'] = true,
-        ['dances'] = true,
+        --['stratagems'] = true, --allow to populate
+        ['dances'] = true,		
         ['wards'] = true,
         ['effusions'] = true,
         ['ready'] = true,
         ['blood-pacts/rage'] = true,
         ['blood-pacts/ward'] = true,
+		['rune-enchantment'] = true
     }
+	
+	local skip_ability = {
+		Sambas = true,
+		Waltzes = true,
+		Jigs = true,
+		Steps = true,
+		["Flourishes I"] = true,
+		["Flourishes II"] = true,
+		["Flourishes III"] = true,
+		Stratagems = true, --make sure this isn't listen when selecting 'abilities'
+		["Phantom Roll"] = true,
+		["Quick Draw"] = true,
+		["Rune Enchantment"] = true,
+		Ward = true,
+		Effusion = true
+	}
 
+	
     for key, id in pairs(abilities) do
         local recast_id = res.job_abilities[id].recast_id
-        local name = res.job_abilities[id].name
+        local name = res.job_abilities[id].name	
         local target_type = res.job_abilities[id].targets
         local ability = crossbar_abilities[kebab_casify(name)]
-        if (not skip_categories[ability.category]) then
-            local icon_path, icon_overridden = maybe_get_custom_icon(ability.default_icon, ability.custom_icon)
-            local icon_offset = 4
-            if (icon_overridden) then
-                icon_offset = 0
-            end
+		
+		windower.add_to_chat(207, name)
+				
+		if not skip_ability[name] then
+			--if not, then add
+			if (not skip_categories[ability.category] and not id ~= 184) then
+				local icon_path, icon_overridden = maybe_get_custom_icon(ability.default_icon, ability.custom_icon)
+				local icon_offset = 4
+				if (icon_overridden) then
+					icon_offset = 0
+				end
 
-            ability_list:append({id = id, name = name, icon = icon_path, icon_offset = icon_offset, data = {target_type = target_type}})
-        end
+				ability_list:append({id = id, name = name, icon = icon_path, icon_offset = icon_offset, data = {target_type = target_type}})
+			end
+		end
     end
 
     ability_list:sort(sortByName)
@@ -1335,6 +1387,7 @@ function action_binder:display_ability_selector()
     self:show_control_hints('Confirm', 'Go Back')
 end
 
+--this function will list the applicable weaponskills for your weapon/level
 function action_binder:display_weaponskill_selector()
     self.title:text('Select Weaponskill')
     self.title:show()
@@ -1402,6 +1455,7 @@ function action_binder:display_pet_command_selector()
     self:show_control_hints('Confirm', 'Go Back')
 end
 
+--function will display the white/black magic
 function action_binder:display_magic_selector_internal(magic_type)
     local player = windower.ffxi.get_player()
     local main_job = player.main_job:lower()
@@ -1565,6 +1619,7 @@ function action_binder:display_bp_rage_selector()
     self:show_control_hints('Confirm', 'Go Back')
 end
 
+--shows blood pact (wards)
 function action_binder:display_bp_ward_selector()
     self.title:text('Select Blood Pact: Ward')
     self.title:show()
@@ -1601,6 +1656,7 @@ function action_binder:display_blue_magic_selector()
     self:show_control_hints('Confirm', 'Go Back')
 end
 
+--displays phantom rolls for COR
 function action_binder:display_phantom_roll_selector()
     self.title:text('Select Phantom Roll')
     self.title:show()
@@ -1672,15 +1728,26 @@ function action_binder:display_stratagem_selector()
     self:show_control_hints('Confirm', 'Go Back')
 end
 
-function action_binder:display_dance_selector()
+--shows dances you can select for each dance Type
+--has been modified from the original to work correctly
+function action_binder:display_dance_selector(danceType)
     self.title:text('Select Dance')
     self.title:show()
 
     local player = windower.ffxi.get_player()
-    local dances = get_dances(player.main_job_id, player.main_job_level)
+    local dances = L{}  -- initialize empty list
 
-    for i, dance in ipairs(get_dances(player.sub_job_id, player.sub_job_level)) do
-        dances:append(dance)
+    -- If main job is Dancer (job_id 19), get full dance list for main job
+    if player.main_job_id == 19 then
+        dances = get_dances(player.main_job_id, player.main_job_level, danceType)
+    end
+
+    -- Always check subjob, but only get dances up to subjob level cap (usually 49)
+    if player.sub_job_id == 19 then
+        local sub_dances = get_dances(player.sub_job_id, math.min(player.sub_job_level, 49), danceType)
+        for _, dance in ipairs(sub_dances) do
+            dances:append(dance)
+        end
     end
 
     self.selector:display_options(dances)
@@ -1695,40 +1762,133 @@ function action_binder:display_geomancy_selector()
     self:show_control_hints('Confirm', 'Go Back')
 end
 
+--Rune Enchantment
 function action_binder:display_rune_enchantment_selector()
     self.title:text('Select Rune Enchantment')
     self.title:show()
 
     local player = windower.ffxi.get_player()
-    local is_main_high_enough = (player.main_job_id == 22 and player.main_job_level >= 5)
-    local is_sub_high_enough = (player.sub_job_id == 22 and player.sub_job_level >= 5)
-    
-    local rune_enchantment_list = L{}
-    if (is_main_high_enough or is_sub_high_enough) then
-        rune_enchantment_list = L{358, 359, 360, 361, 362, 363, 364, 365}
+
+    local abilities = L{}
+
+    -- Get main job abilities if main job is RUN
+    if player.main_job_id == 22 then
+        abilities = get_run_abilities(player.main_job_id, player.main_job_level, "Rune Enchantment")
     end
 
-    local ability_list = L{}
-    for key, id in ipairs(rune_enchantment_list) do
-        local name = res.job_abilities[id].name
-        local target_type = res.job_abilities[id].targets
-        local element = res.elements[res.job_abilities[id].element].en:lower()
-        local rune_enchantment = crossbar_abilities[kebab_casify(name)]
-        if (rune_enchantment.category == 'rune-enchantments') then
-            local icon_path, icon_overridden = maybe_get_custom_icon(rune_enchantment.default_icon, rune_enchantment.custom_icon)
-            local icon_offset = 4
-            if (icon_overridden) then
-                icon_offset = 0
-            end
-
-            ability_list:append({id = id, name = name, icon = icon_path, icon_offset = icon_offset, data = {target_type = target_type}})
+    -- Get subjob abilities if sub job is RUN
+    if player.sub_job_id == 22 then
+        local sub_abilities = get_run_abilities(player.sub_job_id, math.min(player.sub_job_level, 49), "Rune Enchantment")
+        for _, a in ipairs(sub_abilities) do
+            abilities:append(a)
         end
-        ability_list:append({id = id, name = name, icon = icon_path, data = {target_type = target_type}})
     end
 
-    self.selector:display_options(ability_list)
+    self.selector:display_options(abilities)
     self:show_control_hints('Confirm', 'Go Back')
 end
+
+--RUN Wards
+function action_binder:display_rune_ward_selector()
+    self.title:text('Select Ward')
+    self.title:show()
+
+    local player = windower.ffxi.get_player()
+    local abilities = L{}
+
+    -- Get main job abilities if main job is RUN
+    if player.main_job_id == 22 then
+        abilities = get_run_abilities(player.main_job_id, player.main_job_level, "Ward")
+    end
+
+    -- Get subjob abilities if sub job is RUN
+    if player.sub_job_id == 22 then
+        local sub_abilities = get_run_abilities(player.sub_job_id, math.min(player.sub_job_level, 49), "Ward")
+        for _, a in ipairs(sub_abilities) do
+            abilities:append(a)
+        end
+    end
+
+    self.selector:display_options(abilities)
+    self:show_control_hints('Confirm', 'Go Back')
+end
+
+--RUN Effusions
+function action_binder:display_rune_effusion_selector()
+    self.title:text('Select Effusion')
+    self.title:show()
+
+    local player = windower.ffxi.get_player()
+    local abilities = L{}
+
+    -- Get main job abilities if main job is RUN
+    if player.main_job_id == 22 then
+        abilities = get_run_abilities(player.main_job_id, player.main_job_level, "Effusion")
+    end
+
+    -- Get subjob abilities if sub job is RUN
+    if player.sub_job_id == 22 then
+        local sub_abilities = get_run_abilities(player.sub_job_id, math.min(player.sub_job_level, 49), "Effusion")
+        for _, a in ipairs(sub_abilities) do
+            abilities:append(a)
+        end
+    end
+
+    self.selector:display_options(abilities)
+    self:show_control_hints('Confirm', 'Go Back')
+end
+
+--Get RUN Abilities
+function get_run_abilities(job_id, level, ability_type)
+    local run_abilities = L{}
+
+    local abilities_by_type = {
+        ["Rune Enchantment"] = {
+            {name = "Ignis", id = 272, level = 5},
+            {name = "Gelus", id = 273, level = 5},
+            {name = "Flabra", id = 274, level = 5},
+            {name = "Tellus", id = 275, level = 5},
+            {name = "Sulpor", id = 276, level = 5},
+            {name = "Unda", id = 277, level = 5},
+            {name = "Lux", id = 278, level = 5},
+            {name = "Tenebrae", id = 279, level = 5}
+        },
+        ["Ward"] = {
+            {name = "Vallation", id = 284, level = 10},
+            {name = "Pflug", id = 287, level = 40},
+            {name = "Valiance", id = 285, level = 50},
+            {name = "Battuta", id = 376, level = 75},
+            {name = "Liement", id = 288, level = 85}
+        },
+        ["Effusion"] = {
+            {name = "Swipe", id = 292, level = 25},
+            {name = "Lunge", id = 293, level = 25},
+            {name = "Gambit", id = 290, level = 70},
+            {name = "Rayke", id = 291, level = 75}
+        }
+    }
+
+    local abilities = abilities_by_type[ability_type]
+    if not abilities then return run_abilities end
+
+    for _, ability in ipairs(abilities) do
+        if ability.level <= level then
+            run_abilities:append({
+                id = ability.id,
+                name = ability.name,
+                icon = 'icons/abilities/' .. tostring(ability.id) .. '.png',
+                command = string.format('/ja "%s" <me>', ability.name),
+                data = {target_type = "Self"}
+            })
+        end
+    end
+
+    return run_abilities
+end
+
+
+
+
 
 function action_binder:display_ward_selector()
     self.title:text('Select Ward')
@@ -2061,8 +2221,12 @@ function get_stratagems(job_id, job_level)
     return stratagem_list
 end
 
-function get_dances(job_id, job_level)
+--function to get dances
+function get_dances(job_id, job_level, danceType)
     local all_abilities = res.job_abilities
+	
+	--log message to know we got here
+	--windower.add_to_chat(207, "entered the get_dances routine")
 
     local dances = L{
         {name = 'Drain Samba', id = 184, level = 5},
@@ -2098,12 +2262,14 @@ function get_dances(job_id, job_level)
     }
 
     dance_list = L{}
-
+	
+	--DNC is job id 19
     if (job_id == 19) then
         for i, dance in ipairs(dances) do
-            if (job_level >= dance.level) then
-                local crossbar_dance = crossbar_abilities[kebab_casify(command.name)]
-                local target_type = res.job_abilities[command.id].targets
+            if (job_level >= dance.level and string.find(string.lower(dance.name), string.lower(danceType),1,true)) then
+                --windower.add_to_chat(207, string.format("Adding a dance! %s", dance.name))
+				local crossbar_dance = crossbar_abilities[kebab_casify(dance.name)]
+                local target_type = res.job_abilities[dance.id].targets
                 local icon_path = 'ui/red-x.png'
                 local icon_offset = 0
                 local icon_overridden = true
@@ -2115,10 +2281,17 @@ function get_dances(job_id, job_level)
                         icon_offset = 4
                     end
                 end
+				
                 dance_list:append({id = dance.id, name = dance.name, icon = icon_path, icon_offset = icon_offset, data = {target_type = target_type}})
             end
         end
     end
+	
+	--for i, dance in ipairs(dance_list) do
+		--windower.add_to_chat(207, "Dance Id: " .. (dance.id or "?") .. " |  dance name: " .. (dance.name or "?"))
+		--windower.add_to_chat(207, string.format("Job ID: %d | Job Level: %d", job_id, job_level))
+	--end
+	
 
     return dance_list
 end
@@ -2202,43 +2375,60 @@ function get_mounts()
     -- We don't know any id for mount abilities because they're not in resources. We can probably find out eventually, button_layout
     -- for now we don't know, which means we can't get recast for mounts.
     local FAKE_ID = 0
+	
+	local res = require('resources')
+	
+	--test code
+    --windower.add_to_chat(207, "Listing all known mounts from resources:")
+
+    --for id, mount in pairs(res.mounts) do
+    --    windower.add_to_chat(207, string.format("- [%03d] %s", id, mount.name))
+    --end
+	
+	--Updated 2025-03-22 Frostbite (updated the list of available mounts)
 
     mount_list = L{}
 
-    local mount_names = {
-        ['chocobo'] = "Chocobo",
-        ['raptor'] = "Raptor",
-        ['tiger'] = "Tiger",
-        ['crab'] = "Crab",
-        ['red crab'] = "Red Crab",
-        ['bomb'] = "Bomb",
-        ['sheep'] = "Sheep",
-        ['morbol'] = "Morbol",
-        ['crawler'] = "Crawler",
-        ['fenrir'] = "Fenrir",
-        ['beetle'] = "Beetle",
-        ['moogle'] = "Moogle",
-        ['magic pot'] = "Magic Pot",
-        ['tulfaire'] = "Tulfaire",
-        ['warmachine'] = "Warmachine",
-        ['xzomit'] = "Xzomit",
-        ['hippogryph'] = "Hippogryph",
-        ['spectral chair'] = "Spectral Chair",
-        ['spheroid'] = "Spheroid",
-        ['omega'] = "Omega",
-        ['coeurl'] = "Coeurl",
-        ['goobbue'] = "Goobbue",
-        ['raaz'] = "Raaz",
-        ['levitus'] = "Levitus",
-        ['adamantoise'] = "Adamantoise",
-        ['dhalmel'] = "Dhalmel",
-        ['doll'] = "Doll",
-        ['noble chocobo'] = "Noble Chocobo",
-        ['wivre'] = "Wivre",
-        ['iron giant'] = "Iron Giant",
-        ['golden bomb'] = "Golden Bomb",
-        ['mount roulette'] = "Mount Roulette"
-    }
+	local mount_names = {
+		['chocobo'] = "Chocobo",
+		['raptor'] = "Raptor",
+		['tiger'] = "Tiger",
+		['crab'] = "Crab",
+		['red crab'] = "Red Crab",
+		['bomb'] = "Bomb",
+		['sheep'] = "Sheep",
+		['morbol'] = "Morbol",
+		['crawler'] = "Crawler",
+		['fenrir'] = "Fenrir",
+		['beetle'] = "Beetle",
+		['moogle'] = "Moogle",
+		['magic pot'] = "Magic Pot",
+		['tulfaire'] = "Tulfaire",
+		['warmachine'] = "Warmachine",
+		['xzomit'] = "Xzomit",
+		['hippogryph'] = "Hippogryph",
+		['spectral chair'] = "Spectral Chair",
+		['spheroid'] = "Spheroid",
+		['omega'] = "Omega",
+		['coeurl'] = "Coeurl",
+		['goobbue'] = "Goobbue",
+		['raaz'] = "Raaz",
+		['levitus'] = "Levitus",
+		['adamantoise'] = "Adamantoise",
+		['dhalmel'] = "Dhalmel",
+		['doll'] = "Doll",
+		['golden bomb'] = "Golden Bomb",
+		['buffalo'] = "Buffalo",
+		['wivre'] = "Wivre",
+		['red raptor'] = "Red Raptor",
+		['iron giant'] = "Iron Giant",
+		['byakko'] = "Byakko",
+		['noble chocobo'] = "Noble Chocobo",
+		['ixion'] = "Ixion",
+		['phuabo'] = "Phuabo",
+		['mount roulette'] = "Mount Roulette"
+	}
+
 
     local target_type = {['None'] = true}
     for i, mount_name in ipairs(allowed_mounts) do
@@ -2246,6 +2436,7 @@ function get_mounts()
             local default_icon = 'images/' .. get_icon_pathbase() .. '/mount.png'
             local custom_icon = 'mounts/' .. kebab_casify(mount_name) .. '.png'
             local icon_path = maybe_get_custom_icon(default_icon, custom_icon)
+			--windower.add_to_chat(207, mount_names[mount_name])
             mount_list:append({id = FAKE_ID, name = mount_names[mount_name], icon = icon_path, data = {target_type = target_type}})
         end
     end
