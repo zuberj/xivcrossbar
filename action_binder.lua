@@ -92,7 +92,8 @@ local action_types = {
 	['WALTZES'] = 34,
 	['JIGS'] = 35,
 	['STEPS'] = 36,
-	['FLOURISHES'] = 37	
+	['FLOURISHES'] = 37,
+	['CHECK_MOB'] = 38
 }
 
 local prefix_lookup = {
@@ -131,7 +132,8 @@ local prefix_lookup = {
     [action_types.MAP] = 'map',
     [action_types.LAST_SYNTH] = 'ct',
     [action_types.SWITCH_CROSSBARS] = 'ex',
-    [action_types.SWITCH_TARGET] = 'ta'
+    [action_types.SWITCH_TARGET] = 'ta',
+	[action_types.CHECK_MOB] = 'ct'
 }
 
 local action_targets = {
@@ -594,6 +596,13 @@ function action_binder:submit_selected_option()
             self.action_target = nil
             self.state = states.SELECT_BUTTON_ASSIGNMENT
             self:display_button_assigner()
+		elseif (self.action_type == action_types.CHECK_MOB) then
+			self.action_name = 'Check'
+			self.action_command = 'check'			
+			self.action_icon = 'check'
+			self.state = states.SELECT_BUTTON_ASSIGNMENT
+			self:display_button_assigner()
+		
         else
             self.state = states.SELECT_ACTION
             self:display_action_selector()
@@ -840,6 +849,9 @@ function action_binder:display_action_type_selector()
     action_type_list:append({id = action_types.SWITCH_TARGET, name = 'Switch Target', icon = 'images/' ..get_icon_pathbase() .. '/targetnpc.png'})
     action_type_list:append({id = action_types.MAP, name = 'View Map', icon = 'images/' ..get_icon_pathbase() .. '/map.png'})
     action_type_list:append({id = action_types.LAST_SYNTH, name = 'Repeat Last Synth', icon = 'images/' ..get_icon_pathbase() .. '/synth.png'})
+	action_type_list:append({id = action_types.CHECK_MOB, name = 'Check', icon = 'images/' .. get_icon_pathbase() .. '/check.png', data = {command = 'input /check', icon_path = 'images/' .. get_icon_pathbase() .. '/check.png'}})
+
+
     action_type_list:append({id = action_types.SWITCH_CROSSBARS, name = 'Switch Crossbars', icon = 'images/' ..get_icon_pathbase() .. '/ui/facebuttons_' .. self.button_layout .. '.png'})
     action_type_list:append({id = action_types.MOVE_CROSSBARS, name = 'Move Crossbar', icon = 'images/' ..get_icon_pathbase() .. '/ui/dpad_' .. self.button_layout .. '.png'})
     action_type_list:append({id = action_types.SHOW_CREDITS, name = 'XIVCrossbar Credits', icon = 'images/credit_avatars/xiv.png'})
@@ -1008,8 +1020,8 @@ function action_binder:display_button_confirmer()
     self.hints:append(caption)
 end
 
-function action_binder:assign_action()
-	--windower.add_to_chat("Entered the assign_action")
+--assign action to binding
+function action_binder:assign_action()	
     self.save_binding(self.active_crossbar, self.hotkey, prefix_lookup[self.action_type], self.action_name, self.action_target, self.action_command, self.action_icon)
     self:hide()
     self:reset_state()
@@ -1365,7 +1377,7 @@ function action_binder:display_ability_selector()
         local target_type = res.job_abilities[id].targets
         local ability = crossbar_abilities[kebab_casify(name)]
 		
-		windower.add_to_chat(207, name)
+		--windower.add_to_chat(207, name)
 				
 		if not skip_ability[name] then
 			--if not, then add
@@ -2287,11 +2299,6 @@ function get_dances(job_id, job_level, danceType)
         end
     end
 	
-	--for i, dance in ipairs(dance_list) do
-		--windower.add_to_chat(207, "Dance Id: " .. (dance.id or "?") .. " |  dance name: " .. (dance.name or "?"))
-		--windower.add_to_chat(207, string.format("Job ID: %d | Job Level: %d", job_id, job_level))
-	--end
-	
 
     return dance_list
 end
@@ -2377,13 +2384,6 @@ function get_mounts()
     local FAKE_ID = 0
 	
 	local res = require('resources')
-	
-	--test code
-    --windower.add_to_chat(207, "Listing all known mounts from resources:")
-
-    --for id, mount in pairs(res.mounts) do
-    --    windower.add_to_chat(207, string.format("- [%03d] %s", id, mount.name))
-    --end
 	
 	--Updated 2025-03-22 Frostbite (updated the list of available mounts)
 
